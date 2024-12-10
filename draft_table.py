@@ -11,20 +11,22 @@ st.set_page_config(layout="wide")
 # Parse URL parameters
 params = st.experimental_get_query_params()
 
-# Decode base64 encoded connection string and query if provided
-if 'conn' in params:
-    conn_str = base64.b64decode(params['conn'][0]).decode('utf-8')
-    db_host, db_port, db_user, db_password, db_name = conn_str.split(',')
+# Decode base64 encoded connection and query if provided
+if 'data' in params:
+    data_str = base64.b64decode(params['data'][0]).decode('utf-8')
+    data = eval(data_str)
+    db_host = data.get('db_host', "localhost")
+    db_port = data.get('db_port', 5432)
+    db_user = data.get('db_user', "your_username")
+    db_password = data.get('db_password', "your_password")
+    db_name = data.get('db_name', "your_database")
+    query = data.get('query', "SELECT * FROM your_table LIMIT 10;")
 else:
     db_host = st.session_state.get('db_host', "localhost")
     db_port = st.session_state.get('db_port', 5432)
     db_user = st.session_state.get('db_user', "your_username")
     db_password = st.session_state.get('db_password', "your_password")
     db_name = st.session_state.get('db_name', "your_database")
-
-if 'query' in params:
-    query = base64.b64decode(params['query'][0]).decode('utf-8')
-else:
     query = st.session_state.get('query', "SELECT * FROM your_table LIMIT 10;")
 
 # Database connection inputs with URL params as defaults
@@ -40,13 +42,18 @@ query = st.text_area("SQL Query", value=query)
 # Connect to the PostgreSQL database and execute the query
 if st.button("Run Query"):
     try:
-        # Encode current inputs into base64 string
-        conn_str = ','.join([db_host, str(db_port), db_user, db_password, db_name])
-        encoded_conn_str = base64.b64encode(conn_str.encode('utf-8')).decode('utf-8')
-        encoded_query = base64.b64encode(query.encode('utf-8')).decode('utf-8')
+        # Encode current inputs into a single base64 string
+        data = {
+            'db_host': db_host,
+            'db_port': db_port,
+            'db_user': db_user,
+            'db_password': db_password,
+            'db_name': db_name,
+            'query': query
+        }
+        encoded_data_str = base64.b64encode(str(data).encode('utf-8')).decode('utf-8')
 
-        st.write(f"Connection String (Base64): {encoded_conn_str}")
-        st.write(f"Query (Base64): {encoded_query}")
+        st.write(f"Encoded Data (Base64): {encoded_data_str}")
 
         connection_string = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         engine = create_engine(connection_string)
