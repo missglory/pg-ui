@@ -73,14 +73,6 @@ else:
     db_name = st.session_state.get('db_name', "your_database")
     query = st.session_state.get('query', "SELECT * FROM your_table LIMIT 10;")
 
-# Database connection inputs with URL params as defaults
-db_host = st.text_input("Database Host", value=db_host)
-db_port = st.number_input("Database Port", value=int(db_port))
-db_user = st.text_input("Database User", value=db_user)
-db_password = st.text_input("Database Password", type="password", value=db_password)
-db_name = st.text_input("Database Name", value=db_name)
-
-# Query input
 query = st.text_area("SQL Query", value=query)
 
 # Connect to the PostgreSQL database and execute the query
@@ -122,3 +114,9 @@ if st.button("Run Query"):
 
     except Exception as e:
         st.error(f"Error: {e}")
+
+db_host = st.text_input("Database Host", value=db_host)
+db_port = st.number_input("Database Port", value=int(db_port))
+db_user = st.text_input("Database User", value=db_user)
+db_password = st.text_input("Database Password", type="password", value=db_password)
+db_name = st.text_input("Database Name", value=db_name)
