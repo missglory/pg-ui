@@ -9,11 +9,11 @@ import base64
 st.set_page_config(layout="wide")
 
 # Parse URL parameters
-params = st.experimental_get_query_params()
+params = st.query_params
 
 # Decode base64 encoded connection and query if provided
 if 'data' in params:
-    data_str = base64.b64decode(params['data'][0]).decode('utf-8')
+    data_str = base64.b64decode(params['data']).decode('utf-8')
     data = eval(data_str)
     db_host = data.get('db_host', "localhost")
     db_port = data.get('db_port', 5432)
