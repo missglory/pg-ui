@@ -15,9 +15,9 @@ import base64
 
 st.set_page_config(layout="wide")
 
-HOST = 'localhost'
+HOST = "localhost"
 PORT = 8501
-PROTO = 'http'
+PROTO = "http"
 
 # Parse URL parameters
 params = st.query_params
@@ -27,7 +27,7 @@ def get_minimal_timestamp_format(target_timestamp):
     """
     Get the current timestamp in nanoseconds, microseconds, milliseconds, and seconds formats,
     then find the minimal distance to the target timestamp and return the appropriate format.
-    
+
     :param target_timestamp: The target timestamp to compare against (in seconds).
     :return: The closest timestamp format ('ns', 'us', 'ms', 's').
     """
@@ -37,14 +37,15 @@ def get_minimal_timestamp_format(target_timestamp):
     now_s = datetime.datetime.now().timestamp()
 
     distances = {
-        'ns': abs(now_ns - target_timestamp),
-        'us': abs(now_us - target_timestamp),
-        'ms': abs(now_ms - target_timestamp),
-        's': abs(now_s - target_timestamp)
+        "ns": abs(now_ns - target_timestamp),
+        "us": abs(now_us - target_timestamp),
+        "ms": abs(now_ms - target_timestamp),
+        "s": abs(now_s - target_timestamp),
     }
 
     closest_format = min(distances, key=distances.get)
     return closest_format
+
 
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame(
@@ -54,24 +55,23 @@ if "df" not in st.session_state:
 st.dataframe(st.session_state.df, use_container_width=True)
 
 
-
 # Decode base64 encoded connection and query if provided
-if 'data' in params:
-    data_str = base64.b64decode(params['data']).decode('utf-8')
+if "data" in params:
+    data_str = base64.b64decode(params["data"]).decode("utf-8")
     data = eval(data_str)
-    db_host = data.get('db_host', "localhost")
-    db_port = data.get('db_port', 5432)
-    db_user = data.get('db_user', "your_username")
-    db_password = data.get('db_password', "your_password")
-    db_name = data.get('db_name', "your_database")
-    query = data.get('query', "SELECT * FROM your_table LIMIT 10;")
+    db_host = data.get("db_host", "localhost")
+    db_port = data.get("db_port", 5432)
+    db_user = data.get("db_user", "your_username")
+    db_password = data.get("db_password", "your_password")
+    db_name = data.get("db_name", "your_database")
+    query = data.get("query", "SELECT * FROM your_table LIMIT 10;")
 else:
-    db_host = st.session_state.get('db_host', "localhost")
-    db_port = st.session_state.get('db_port', 5432)
-    db_user = st.session_state.get('db_user', "your_username")
-    db_password = st.session_state.get('db_password', "your_password")
-    db_name = st.session_state.get('db_name', "your_database")
-    query = st.session_state.get('query', "SELECT * FROM your_table LIMIT 10;")
+    db_host = st.session_state.get("db_host", "localhost")
+    db_port = st.session_state.get("db_port", 5432)
+    db_user = st.session_state.get("db_user", "your_username")
+    db_password = st.session_state.get("db_password", "your_password")
+    db_name = st.session_state.get("db_name", "your_database")
+    query = st.session_state.get("query", "SELECT * FROM your_table LIMIT 10;")
 
 query = st.text_area("SQL Query", value=query)
 
@@ -80,26 +80,34 @@ if st.button("Run Query"):
     try:
         # Encode current inputs into a single base64 string
         data = {
-            'db_host': db_host,
-            'db_port': db_port,
-            'db_user': db_user,
-            'db_password': db_password,
-            'db_name': db_name,
-            'query': query
+            "db_host": db_host,
+            "db_port": db_port,
+            "db_user": db_user,
+            "db_password": db_password,
+            "db_name": db_name,
+            "query": query,
         }
-        encoded_data_str = base64.b64encode(str(data).encode('utf-8')).decode('utf-8')
+        encoded_data_str = base64.b64encode(str(data).encode("utf-8")).decode("utf-8")
 
-        st.write('query link:')
-        st.code(f'{PROTO}://{HOST}:{PORT}/?data={encoded_data_str}', language='plaintext')
+        st.write("query link:")
+        st.code(
+            f"{PROTO}://{HOST}:{PORT}/?data={encoded_data_str}", language="plaintext"
+        )
 
-        connection_string = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        connection_string = (
+            f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        )
         engine = create_engine(connection_string)
         df = pd.read_sql(query, engine)
 
         # Convert timestamp columns from nanoseconds to datetime
         for col in df.columns:
-            if 'timestamp' in col.lower():
-                df[col] = pd.to_datetime(df[col], unit=get_minimal_timestamp_format(df[col][0]))
+            if "timestamp" in col.lower():
+                df[col] = pd.to_datetime(
+                    df[col],
+                    unit=get_minimal_timestamp_format(df[col][0]),
+                    # format="%d/%m",
+                )
 
         st.session_state.df = df
 
@@ -110,7 +118,6 @@ if st.button("Run Query"):
         st.session_state.db_password = db_password
         st.session_state.db_name = db_name
         st.session_state.query = query
-
 
     except Exception as e:
         st.error(f"Error: {e}")
