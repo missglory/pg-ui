@@ -27,7 +27,7 @@ if st.button("Run Query"):
         # Convert timestamp columns from nanoseconds to datetime
         for col in df.columns:
             if 'timestamp' in col.lower():
-                df[col] = pd.to_datetime(df[col], unit='ns')
+                df[col] = pd.to_datetime(df[col], unit='ms')
 
         st.session_state.df = df
 
