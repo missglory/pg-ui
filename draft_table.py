@@ -4,6 +4,12 @@ import psycopg2
 from sqlalchemy import create_engine
 import pandas as pd
 import numpy as np
+import base64
+import datetime
+import psycopg2
+from sqlalchemy import create_engine
+import pandas as pd
+import numpy as np
 import datetime
 import base64
 
@@ -87,6 +93,26 @@ if st.button("Run Query"):
 
     except Exception as e:
         st.error(f"Error: {e}")
+
+def get_minimal_timestamp_format(target_timestamp):
+    """
+    Get the current timestamp in nanoseconds, milliseconds, and seconds formats,
+    then find the minimal distance to the target timestamp and return the appropriate format.
+    
+    :param target_timestamp: The target timestamp to compare against (in seconds).
+    :return: The closest timestamp format ('ns', 'ms', 's').
+    """
+    now_ns = datetime.datetime.now().timestamp() * 1e9
+    now_ms = datetime.datetime.now().timestamp() * 1e3
+    now_s = datetime.datetime.now().timestamp()
+
+    distances = {
+        'ns': abs(now_ns - target_timestamp * 1e9),
+        'ms': abs(now_ms - target_timestamp * 1e3),
+        's': abs(now_s - target_timestamp)
+    }
+
+    return min(distances, key=distances.get)
 
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame(
