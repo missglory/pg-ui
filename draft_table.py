@@ -8,6 +8,10 @@ import base64
 
 st.set_page_config(layout="wide")
 
+HOST = 'localhost'
+PORT = 8501
+PROTO = 'http'
+
 # Parse URL parameters
 params = st.query_params
 
@@ -53,8 +57,8 @@ if st.button("Run Query"):
         }
         encoded_data_str = base64.b64encode(str(data).encode('utf-8')).decode('utf-8')
 
-        st.write('base64 query:')
-        st.code(encoded_data_str, language='plaintext')
+        st.write('query link:')
+        st.code(f'{PROTO}://{HOST}:{PORT}/?data={encoded_data_str}', language='plaintext')
 
         connection_string = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         engine = create_engine(connection_string)
