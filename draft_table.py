@@ -59,19 +59,15 @@ st.dataframe(st.session_state.df, use_container_width=True)
 if "data" in params:
     data_str = base64.b64decode(params["data"]).decode("utf-8")
     data = eval(data_str)
-    db_host = data.get("db_host", "localhost")
-    db_port = data.get("db_port", 5432)
-    db_user = data.get("db_user", "your_username")
-    db_password = data.get("db_password", "your_password")
-    db_name = data.get("db_name", "your_database")
-    query = data.get("query", "SELECT * FROM your_table LIMIT 10;")
 else:
-    db_host = st.session_state.get("db_host", "localhost")
-    db_port = st.session_state.get("db_port", 5432)
-    db_user = st.session_state.get("db_user", "your_username")
-    db_password = st.session_state.get("db_password", "your_password")
-    db_name = st.session_state.get("db_name", "your_database")
-    query = st.session_state.get("query", "SELECT * FROM your_table LIMIT 10;")
+    data = {}
+
+db_host = data.get("db_host", st.session_state.get("db_host", "localhost"))
+db_port = data.get("db_port", st.session_state.get("db_port", 5432))
+db_user = data.get("db_user", st.session_state.get("db_user", "your_username"))
+db_password = data.get("db_password", st.session_state.get("db_password", "your_password"))
+db_name = data.get("db_name", st.session_state.get("db_name", "your_database"))
+query = data.get("query", st.session_state.get("query", "SELECT * FROM your_table LIMIT 10;"))
 
 query = st.text_area("SQL Query", value=query)
 
