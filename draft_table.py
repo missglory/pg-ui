@@ -37,9 +37,9 @@ def get_minimal_timestamp_format(target_timestamp):
     now_s = datetime.datetime.now().timestamp()
 
     distances = {
-        'ns': abs(now_ns - target_timestamp * 1e9),
-        'us': abs(now_us - target_timestamp * 1e6),
-        'ms': abs(now_ms - target_timestamp * 1e3),
+        'ns': abs(now_ns - target_timestamp),
+        'us': abs(now_us - target_timestamp),
+        'ms': abs(now_ms - target_timestamp),
         's': abs(now_s - target_timestamp)
     }
 
@@ -107,7 +107,7 @@ if st.button("Run Query"):
         # Convert timestamp columns from nanoseconds to datetime
         for col in df.columns:
             if 'timestamp' in col.lower():
-                df[col] = pd.to_datetime(df[col], unit='s')
+                df[col] = pd.to_datetime(df[col], unit=get_minimal_timestamp_format(df[col][0]))
 
         st.session_state.df = df
 
@@ -119,10 +119,6 @@ if st.button("Run Query"):
         st.session_state.db_name = db_name
         st.session_state.query = query
 
-        # Example usage of get_minimal_timestamp_format
-        target_timestamp = df['timestamp_column'].iloc[0].timestamp()  # Replace 'timestamp_column' with your actual column name
-        closest_format = get_minimal_timestamp_format(target_timestamp)
-        st.write(f"Closest timestamp format: {closest_format}")
 
     except Exception as e:
         st.error(f"Error: {e}")
