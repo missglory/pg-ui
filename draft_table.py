@@ -1,4 +1,5 @@
 import streamlit as st
+import datetime
 import psycopg2
 from sqlalchemy import create_engine
 import pandas as pd
@@ -78,6 +79,11 @@ if st.button("Run Query"):
         st.session_state.db_password = db_password
         st.session_state.db_name = db_name
         st.session_state.query = query
+
+        # Example usage of get_minimal_timestamp_format
+        target_timestamp = df['timestamp_column'].iloc[0].timestamp()  # Replace 'timestamp_column' with your actual column name
+        closest_format = get_minimal_timestamp_format(target_timestamp)
+        st.write(f"Closest timestamp format: {closest_format}")
 
     except Exception as e:
         st.error(f"Error: {e}")
