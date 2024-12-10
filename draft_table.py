@@ -7,15 +7,18 @@ import datetime
 
 st.set_page_config(layout="wide")
 
-# Database connection inputs
-db_host = st.text_input("Database Host", value=st.session_state.get('db_host', "localhost"))
-db_port = st.number_input("Database Port", value=st.session_state.get('db_port', 5432))
-db_user = st.text_input("Database User", value=st.session_state.get('db_user', "your_username"))
-db_password = st.text_input("Database Password", type="password", value=st.session_state.get('db_password', "your_password"))
-db_name = st.text_input("Database Name", value=st.session_state.get('db_name', "your_database"))
+# Parse URL parameters
+params = st.experimental_get_query_params()
+
+# Database connection inputs with URL params as defaults
+db_host = st.text_input("Database Host", value=st.session_state.get('db_host', params.get('db_host', ["localhost"])[0]))
+db_port = st.number_input("Database Port", value=int(st.session_state.get('db_port', params.get('db_port', [5432])[0])))
+db_user = st.text_input("Database User", value=st.session_state.get('db_user', params.get('db_user', ["your_username"])[0]))
+db_password = st.text_input("Database Password", type="password", value=st.session_state.get('db_password', params.get('db_password', ["your_password"])[0]))
+db_name = st.text_input("Database Name", value=st.session_state.get('db_name', params.get('db_name', ["your_database"])[0]))
 
 # Query input
-query = st.text_area("SQL Query", value=st.session_state.get('query', "SELECT * FROM your_table LIMIT 10;"))
+query = st.text_area("SQL Query", value=st.session_state.get('query', params.get('query', ["SELECT * FROM your_table LIMIT 10;"])[0]))
 
 # Connect to the PostgreSQL database and execute the query
 if st.button("Run Query"):
