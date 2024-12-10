@@ -3,8 +3,7 @@ import psycopg2
 from sqlalchemy import create_engine
 import pandas as pd
 import numpy as np
-import pandas as pd
-import numpy as np
+import datetime
 
 st.set_page_config(layout="wide")
 
@@ -24,6 +23,12 @@ if st.button("Run Query"):
         connection_string = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         engine = create_engine(connection_string)
         df = pd.read_sql(query, engine)
+
+        # Convert timestamp columns from nanoseconds to datetime
+        for col in df.columns:
+            if 'timestamp' in col.lower():
+                df[col] = pd.to_datetime(df[col], unit='ns')
+
         st.session_state.df = df
 
         # Store input values in session state
