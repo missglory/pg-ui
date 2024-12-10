@@ -25,23 +25,26 @@ params = st.query_params
 
 def get_minimal_timestamp_format(target_timestamp):
     """
-    Get the current timestamp in nanoseconds, milliseconds, and seconds formats,
+    Get the current timestamp in nanoseconds, microseconds, milliseconds, and seconds formats,
     then find the minimal distance to the target timestamp and return the appropriate format.
     
     :param target_timestamp: The target timestamp to compare against (in seconds).
-    :return: The closest timestamp format ('ns', 'ms', 's').
+    :return: The closest timestamp format ('ns', 'us', 'ms', 's').
     """
     now_ns = datetime.datetime.now().timestamp() * 1e9
+    now_us = datetime.datetime.now().timestamp() * 1e6
     now_ms = datetime.datetime.now().timestamp() * 1e3
     now_s = datetime.datetime.now().timestamp()
 
     distances = {
         'ns': abs(now_ns - target_timestamp * 1e9),
+        'us': abs(now_us - target_timestamp * 1e6),
         'ms': abs(now_ms - target_timestamp * 1e3),
         's': abs(now_s - target_timestamp)
     }
 
-    return pd.to_datetime(target_timestamp, min(distances, key=distances.get))
+    closest_format = min(distances, key=distances.get)
+    return closest_format
 
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame(
