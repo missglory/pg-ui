@@ -4,25 +4,50 @@ from sqlalchemy import create_engine
 import pandas as pd
 import numpy as np
 import datetime
+import base64
 
 st.set_page_config(layout="wide")
 
 # Parse URL parameters
 params = st.experimental_get_query_params()
 
+# Decode base64 encoded connection string and query if provided
+if 'conn' in params:
+    conn_str = base64.b64decode(params['conn'][0]).decode('utf-8')
+    db_host, db_port, db_user, db_password, db_name = conn_str.split(',')
+else:
+    db_host = st.session_state.get('db_host', "localhost")
+    db_port = st.session_state.get('db_port', 5432)
+    db_user = st.session_state.get('db_user', "your_username")
+    db_password = st.session_state.get('db_password', "your_password")
+    db_name = st.session_state.get('db_name', "your_database")
+
+if 'query' in params:
+    query = base64.b64decode(params['query'][0]).decode('utf-8')
+else:
+    query = st.session_state.get('query', "SELECT * FROM your_table LIMIT 10;")
+
 # Database connection inputs with URL params as defaults
-db_host = st.text_input("Database Host", value=st.session_state.get('db_host', params.get('db_host', ["localhost"])[0]))
-db_port = st.number_input("Database Port", value=int(st.session_state.get('db_port', params.get('db_port', [5432])[0])))
-db_user = st.text_input("Database User", value=st.session_state.get('db_user', params.get('db_user', ["your_username"])[0]))
-db_password = st.text_input("Database Password", type="password", value=st.session_state.get('db_password', params.get('db_password', ["your_password"])[0]))
-db_name = st.text_input("Database Name", value=st.session_state.get('db_name', params.get('db_name', ["your_database"])[0]))
+db_host = st.text_input("Database Host", value=db_host)
+db_port = st.number_input("Database Port", value=int(db_port))
+db_user = st.text_input("Database User", value=db_user)
+db_password = st.text_input("Database Password", type="password", value=db_password)
+db_name = st.text_input("Database Name", value=db_name)
 
 # Query input
-query = st.text_area("SQL Query", value=st.session_state.get('query', params.get('query', ["SELECT * FROM your_table LIMIT 10;"])[0]))
+query = st.text_area("SQL Query", value=query)
 
 # Connect to the PostgreSQL database and execute the query
 if st.button("Run Query"):
     try:
+        # Encode current inputs into base64 string
+        conn_str = ','.join([db_host, str(db_port), db_user, db_password, db_name])
+        encoded_conn_str = base64.b64encode(conn_str.encode('utf-8')).decode('utf-8')
+        encoded_query = base64.b64encode(query.encode('utf-8')).decode('utf-8')
+
+        st.write(f"Connection String (Base64): {encoded_conn_str}")
+        st.write(f"Query (Base64): {encoded_query}")
+
         connection_string = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         engine = create_engine(connection_string)
         df = pd.read_sql(query, engine)
