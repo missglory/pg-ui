@@ -53,7 +53,8 @@ if st.button("Run Query"):
         }
         encoded_data_str = base64.b64encode(str(data).encode('utf-8')).decode('utf-8')
 
-        st.write(f"Encoded Data (Base64): {encoded_data_str}")
+        st.write('base64 query:')
+        st.code(encoded_data_str, language='plaintext')
 
         connection_string = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         engine = create_engine(connection_string)
