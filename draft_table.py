@@ -62,64 +62,72 @@ if "data" in params:
 else:
     data = {}
 
-db_host = data.get("db_host", st.session_state.get("db_host", "localhost"))
-db_port = data.get("db_port", st.session_state.get("db_port", 5432))
-db_user = data.get("db_user", st.session_state.get("db_user", "your_username"))
-db_password = data.get("db_password", st.session_state.get("db_password", "your_password"))
-db_name = data.get("db_name", st.session_state.get("db_name", "your_database"))
-query = data.get("query", st.session_state.get("query", "SELECT * FROM your_table LIMIT 10;"))
 
-query = st.text_area("SQL Query", value=query)
+if 'query' not in st.session_state: st.session_state.query = data.get("query", "SELECT * FROM your_table LIMIT 10;")
+query = st.text_area("SQL Query", key="query")
+
+if 'db_host' not in st.session_state: st.session_state.db_host = data.get("db_host", "localhost")
+if 'db_port' not in st.session_state: st.session_state.db_port = int(data.get("db_port", 5432))
+if 'db_user' not in st.session_state: st.session_state.db_user = data.get("db_user", "your_username")
+if 'db_password' not in st.session_state: st.session_state.db_password = data.get("db_password", "your_password")
+if 'db_name' not in st.session_state: st.session_state.db_name = data.get("db_name", "your_database")
+
+
+def update_df():
+    data = {
+        "db_host": st.session_state.db_host,
+        "db_port": int(st.session_state.db_port),
+        "db_user": st.session_state.db_user,
+        "db_password": st.session_state.db_password,
+        "db_name": st.session_state.db_name,
+        "query": query,
+    }
+    encoded_data_str = base64.b64encode(str(data).encode("utf-8")).decode("utf-8")
+
+    st.write("query link:")
+    st.code(f"{PROTO}://{HOST}:{PORT}/?data={encoded_data_str}", language="plaintext")
+
+    connection_string = f"postgresql://{data['db_user']}:{data['db_password']}@{data['db_host']}:{data['db_port']}/{data['db_name']}"
+    engine = create_engine(connection_string)
+    df = pd.read_sql(query, engine)
+
+    # Convert timestamp columns from nanoseconds to datetime
+    for col in df.columns:
+        if "timestamp" in col.lower():
+            df[col] = pd.to_datetime(
+                df[col],
+                unit=get_minimal_timestamp_format(df[col][0]),
+                # format="%d/%m",
+            )
+
+    st.session_state.df = df
+
 
 # Connect to the PostgreSQL database and execute the query
 if st.button("Run Query"):
     try:
+        update_df()
+        # db_host = st.session_state.get("db_host", "localhost")
+        # db_port = st.session_state.get("db_port", 5432)
+        # db_user = st.session_state.get("db_user", "your_username")
+        # db_password = st.session_state.get("db_password", "your_password")
+        # db_name = st.session_state.get("db_name", "your_database")
+        # query = st.session_state.get("query", "SELECT * FROM your_table LIMIT 10;")
         # Encode current inputs into a single base64 string
-        data = {
-            "db_host": db_host,
-            "db_port": db_port,
-            "db_user": db_user,
-            "db_password": db_password,
-            "db_name": db_name,
-            "query": query,
-        }
-        encoded_data_str = base64.b64encode(str(data).encode("utf-8")).decode("utf-8")
-
-        st.write("query link:")
-        st.code(
-            f"{PROTO}://{HOST}:{PORT}/?data={encoded_data_str}", language="plaintext"
-        )
-
-        connection_string = (
-            f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-        )
-        engine = create_engine(connection_string)
-        df = pd.read_sql(query, engine)
-
-        # Convert timestamp columns from nanoseconds to datetime
-        for col in df.columns:
-            if "timestamp" in col.lower():
-                df[col] = pd.to_datetime(
-                    df[col],
-                    unit=get_minimal_timestamp_format(df[col][0]),
-                    # format="%d/%m",
-                )
-
-        st.session_state.df = df
 
         # Store input values in session state
-        st.session_state.db_host = db_host
-        st.session_state.db_port = db_port
-        st.session_state.db_user = db_user
-        st.session_state.db_password = db_password
-        st.session_state.db_name = db_name
-        st.session_state.query = query
-
+        # st.session_state.db_host = db_host
+        # st.session_state.db_port = db_port
+        # st.session_state.db_user = db_user
+        # st.session_state.db_password = db_password
+        # st.session_state.db_name = db_name
+        # st.session_state.query = query
     except Exception as e:
         st.error(f"Error: {e}")
 
-db_host = st.text_input("Database Host", value=db_host)
-db_port = st.number_input("Database Port", value=int(db_port))
-db_user = st.text_input("Database User", value=db_user)
-db_password = st.text_input("Database Password", type="password", value=db_password)
-db_name = st.text_input("Database Name", value=db_name)
+
+st.text_input("Database Host", key="db_host")
+st.number_input("Database Port", key="db_port", format='%u')
+st.text_input("Database User", key="db_user")
+st.text_input("Database Password", type="password", key="db_password")
+st.text_input("Database Name", key="db_name")
