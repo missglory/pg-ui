@@ -59,9 +59,9 @@ def color_cells(val):
     """
     if isinstance(val, str):
         if 'Sell' in val:
-            return 'background-color: red'
+            return 'color: red'
         elif 'Buy' in val:
-            return 'background-color: green'
+            return 'color: green'
     return ''
 
 styled_df = st.session_state.df.style.applymap(color_cells)
@@ -98,7 +98,8 @@ def update_df():
     encoded_data_str = base64.b64encode(str(data).encode("utf-8")).decode("utf-8")
 
     st.write("query link:")
-    st.code(f"{PROTO}://{HOST}:{PORT}/?data={encoded_data_str}", language="plaintext")
+    pl=f"{PROTO}://{HOST}:{PORT}/?data={encoded_data_str}"
+    st.page_link(pl, label=pl)
 
     connection_string = f"postgresql://{data['db_user']}:{data['db_password']}@{data['db_host']}:{data['db_port']}/{data['db_name']}"
     engine = create_engine(connection_string)
