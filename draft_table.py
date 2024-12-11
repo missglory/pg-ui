@@ -52,7 +52,20 @@ if "df" not in st.session_state:
         np.random.randn(12, 5), columns=["a", "b", "c", "d", "e"]
     )
 
-st.dataframe(st.session_state.df, use_container_width=True)
+def color_cells(val):
+    """
+    Color cells based on their value.
+    Red for 'Sell', Green for 'Buy'.
+    """
+    if isinstance(val, str):
+        if 'Sell' in val:
+            return 'background-color: red'
+        elif 'Buy' in val:
+            return 'background-color: green'
+    return ''
+
+styled_df = st.session_state.df.style.applymap(color_cells)
+st.dataframe(styled_df, use_container_width=True)
 
 
 # Decode base64 encoded connection and query if provided
