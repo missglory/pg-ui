@@ -5,14 +5,7 @@ from sqlalchemy import create_engine
 import pandas as pd
 import numpy as np
 import base64
-import datetime
-import psycopg2
-from sqlalchemy import create_engine
-import pandas as pd
-import numpy as np
-import datetime
-import base64
-
+import time
 st.set_page_config(layout="wide")
 
 HOST = "localhost"
@@ -52,6 +45,7 @@ if "df" not in st.session_state:
         np.random.randn(12, 5), columns=["a", "b", "c", "d", "e"]
     )
 
+st.write(params)
 def color_cells(val):
     """
     Color cells based on their value.
@@ -74,7 +68,6 @@ if "data" in params:
     data = eval(data_str)
 else:
     data = {}
-
 
 if 'query' not in st.session_state: st.session_state.query = data.get("query", "SELECT * FROM your_table LIMIT 10;")
 query = st.text_area("SQL Query", key="query")
@@ -145,3 +138,17 @@ st.number_input("Database Port", key="db_port", format='%u')
 st.text_input("Database User", key="db_user")
 st.text_input("Database Password", type="password", key="db_password")
 st.text_input("Database Name", key="db_name")
+
+# Add input field for timestamp to datetime conversion
+st.write("Input timestamp:")
+input_ts = st.number_input("Timestamp", min_value=0, max_value=9007199254740990, value=1643723401643, step=1)
+st.write("Output datetime:")
+output_datetime = pd.to_datetime(input_ts, unit=get_minimal_timestamp_format(input_ts))
+st.write(output_datetime)
+
+# Add output field for datetime to timestamp conversion
+st.write("Input datetime:")
+input_datetime = st.date_input("Date")
+st.write("Output timestamp (in nanoseconds):")
+output_timestamp = int(time.mktime(input_datetime.timetuple()) * 1e9)
+st.write(output_timestamp)
