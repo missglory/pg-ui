@@ -129,7 +129,12 @@ def update_df():
         engine = create_engine(connection_string)
     
     inspector = inspect(engine)
-    st.write(inspector.get_table_names())
+    table_names = inspector.get_table_names()
+    # st.write(table_names)
+
+    for tn in table_names:
+        expander = st.expander(tn)
+        expander.write(inspector.get_columns(tn))
     if db_mode == "postgres" or db_mode == "mysql":
         # st.write(inspector.get_columns("Order"))
         pass
