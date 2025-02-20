@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import base64
 import time
+import plotly.express as px
 st.set_page_config(layout="wide")
 
 HOST = "localhost"
@@ -146,6 +147,12 @@ def update_df():
             )
 
     st.session_state.df = df
+
+    # Render plotly plot
+    if 'TradeFill' in query:
+        trade_fill_df = st.session_state.df[st.session_state.df['table'] == 'TradeFill']
+        fig = px.scatter(trade_fill_df, x='timestamp', y='price', size='amount')
+        st.plotly_chart(fig)
 
 
 # Connect to the PostgreSQL database and execute the query
