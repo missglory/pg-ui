@@ -131,9 +131,9 @@ def update_df():
     
     inspector = inspect(engine)
     st.write(inspector.get_table_names())
-    if db_mode == "postgres" or db_mode == "mysql":
-        # st.write(inspector.get_columns("Order"))
-        pass
+    # if db_mode == "postgres" or db_mode == "mysql":
+    #     # st.write(inspector.get_columns("Order"))
+    #     pass
     
     df = pd.read_sql(query, engine)
 
@@ -150,8 +150,8 @@ def update_df():
 
     # Render plotly plot
     if 'TradeFill' in query:
-        trade_fill_df = st.session_state.df[st.session_state.df['table'] == 'TradeFill']
-        fig = px.scatter(trade_fill_df, x='timestamp', y='price', size='amount')
+        # trade_fill_df = st.session_state.df[st.session_state.df['table'] == 'TradeFill']
+        fig = px.scatter(df, x='timestamp', y='price', size='amount')
         st.plotly_chart(fig)
 
 
